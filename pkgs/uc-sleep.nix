@@ -4,23 +4,28 @@
   fetchFromGitHub,
   ...
 }:
-python3.pkgs.buildPythonApplication {
+let
   pname = "uc-sleep";
-  version = "0-unstable-20251215";
+  date = "20251215";
+  rev = "fb97421766eea93f55ac31d1865c47e0913cee70";
+  hash = "sha256-zJzKKENLPsgun7zGSpNLy6LPcdO55F/XeLDbAxxZpD0=";
+  propagatedBuildInputs = with python3.pkgs; [
+    python-uinput
+    inotify-simple
+  ];
+in
+python3.pkgs.buildPythonApplication {
+  inherit pname propagatedBuildInputs;
+
+  version = "unstable-${date}";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "robertjakub";
     repo = "uConsole-sleep";
-    rev = "fb97421766eea93f55ac31d1865c47e0913cee70";
-    hash = "sha256-zJzKKENLPsgun7zGSpNLy6LPcdO55F/XeLDbAxxZpD0=";
+    inherit rev hash;
   };
-  build-system = with python3.pkgs; [setuptools];
-
-  propagatedBuildInputs = with python3.pkgs; [
-    python-uinput
-    inotify-simple
-  ];
+  build-system = with python3.pkgs; [ setuptools];
 
   preBuild = ''
     touch src/__init__.py
@@ -36,11 +41,10 @@ def main():
 EOF
     cat > pyproject.toml << EOF
 [project]
-name = "uc-sleep"
-version = "0.1.0"
+name = "${pname}"
+version = "0.0.0.dev${date}+git.${builtins.substring 0 7 rev}"
 dependencies = [
-  "python-uinput",
-  "inotify-simple",
+${lib.concatMapStringsSep "\n" (d: "  \"${d.pname}\",") propagatedBuildInputs}
 ]
 
 [build-system]
