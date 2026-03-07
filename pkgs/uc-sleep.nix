@@ -5,36 +5,56 @@
   ...
 }:
 let
-  python = python3.withPackages (ps: [
-    ps.python-uinput
-    ps.inotify-simple
-  ]);
+  pname = "uc-sleep";
+  date = "20251215";
+  rev = "fb97421766eea93f55ac31d1865c47e0913cee70";
+  hash = "sha256-zJzKKENLPsgun7zGSpNLy6LPcdO55F/XeLDbAxxZpD0=";
+  propagatedBuildInputs = with python3.pkgs; [
+    python-uinput
+    inotify-simple
+  ];
 in
 python3.pkgs.buildPythonApplication {
-  pname = "uc-sleep";
-  version = "0-unstable-20251215";
-  format = "other";
+  inherit pname propagatedBuildInputs;
+
+  version = "unstable-${date}";
+  pyproject = true;
 
   src = fetchFromGitHub {
     owner = "robertjakub";
     repo = "uConsole-sleep";
-    rev = "fb97421766eea93f55ac31d1865c47e0913cee70";
-    hash = "sha256-zJzKKENLPsgun7zGSpNLy6LPcdO55F/XeLDbAxxZpD0=";
+    inherit rev hash;
   };
+  build-system = with python3.pkgs; [ setuptools];
 
-  dontBuild = true;
+  preBuild = ''
+    touch src/__init__.py
+    cat >> src/sleep_power_control.py << EOF
+def main():
+  pass
 
-  installPhase = ''
-    runHook preInstall
-    mkdir -p $out/bin
-    echo "#!${python}/bin/python3" > $out/bin/sleep_power_control
-    cat src/sleep_power_control.py >> $out/bin/sleep_power_control
-    chmod 0555 $out/bin/sleep_power_control
+EOF
+    cat >> src/sleep_remap_powerkey.py << EOF
+def main():
+  pass
 
-    echo "#!${python}/bin/python3" > $out/bin/sleep_remap_powerkey
-    cat src/sleep_remap_powerkey.py >> $out/bin/sleep_remap_powerkey
-    chmod 0555 $out/bin/sleep_remap_powerkey
-    runHook postInstall
+EOF
+    cat > pyproject.toml << EOF
+[project]
+name = "${pname}"
+version = "0.0.0.dev${date}+git.${builtins.substring 0 7 rev}"
+dependencies = [
+${lib.concatMapStringsSep "\n" (d: "  \"${d.pname}\",") propagatedBuildInputs}
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+sleep_power_control = "sleep_power_control:main"
+sleep_remap_powerkey = "sleep_remap_powerkey:main"
+EOF
   '';
 
   meta = {
