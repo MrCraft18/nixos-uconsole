@@ -44,6 +44,7 @@
         {
           variant ? "cm4",
           modules ? [ ],
+          specialArgs ? { },
         }:
         nixos-raspberrypi.lib.nixosSystem {
           # specialArgs makes these values available to all modules
@@ -53,7 +54,7 @@
             inherit inputs; # Same as: inputs = inputs;
             nixos-raspberrypi = nixos-raspberrypi; # Lets modules access rpi-specific stuff
             isCM4 = variant == "cm4"; # For conditional kernel params in cm.nix
-          };
+          } // specialArgs;
 
           # `++` concatenates lists: [1 2] ++ [3 4] = [1 2 3 4]
           # We combine our base modules with any custom modules passed in
@@ -191,10 +192,8 @@
           specialArgs = {
             inherit inputs;
             nixos-raspberrypi = nixos-raspberrypi;
-          } // specialArgs // {
-            # isCM4 must not be overridden - it's derived from variant
             isCM4 = variant == "cm4";
-          };
+          } // specialArgs;
           modules =
             mkRpiModules variant
             ++ [
