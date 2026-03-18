@@ -63,7 +63,7 @@
             # === NixOS Base Modules ===
             # These come from nixpkgs and provide core functionality
             #
-            "${nixpkgs}/nixos/modules/profiles/base.nix"
+            # "${nixpkgs}/nixos/modules/profiles/base.nix"
             "${nixpkgs}/nixos/modules/installer/sd-card/sd-image.nix"
             "${nixpkgs}/nixos/modules/installer/cd-dvd/channel.nix"
           ]
@@ -80,7 +80,7 @@
             self.nixosModules.kernel # Kernel patches for display, power, etc.
             self.nixosModules.configtxt # Raspberry Pi boot configuration
             self.nixosModules.cm # Compute module kernel parameters
-            self.nixosModules.base # Good defaults (NetworkManager, SSH, etc.)
+            # self.nixosModules.base # Good defaults (NetworkManager, SSH, etc.)
             self.nixosModules.uc-sleep # Power button sleep/wake handling
             self.nixosModules.uc-4g # Optional 4G module (enable with hardware.uc-4g.enable)
 
@@ -201,7 +201,7 @@
               self.nixosModules.kernel
               self.nixosModules.configtxt
               self.nixosModules.cm
-              self.nixosModules.base
+              # self.nixosModules.base
               self.nixosModules.uc-sleep
               self.nixosModules.uc-4g
 
